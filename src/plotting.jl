@@ -1,5 +1,6 @@
 using PlotlyJS
 using Colors
+import PlotlyJS.plot
 
 include("Polyhedron.jl")
 include("decomposition.jl")
@@ -7,8 +8,8 @@ include("decomposition.jl")
 """
 Aux function to plot a polyhedron. Returns array of traces that can be handled by PlotlyJS.
 """
-function tracePolyhedron(poly::Polyhedron; color::Color = RGB(0,0.9,1), text::Bool = false)
-    polyTriang = triangulatePolyhedron(poly)
+function trace_polyhedron(poly::Polyhedron; color::Color = RGB(0,0.9,1), labels::Bool = false, opacity::Real = 0.6)
+    polyTriang = triangulate(poly)
 
     facecolor = repeat([color], length(polyTriang.facets))
 
@@ -21,7 +22,7 @@ function tracePolyhedron(poly::Polyhedron; color::Color = RGB(0,0.9,1), text::Bo
         j = [triang[2] for triang in polyTriang.facets].-1,
         k = [triang[3] for triang in polyTriang.facets].-1,
         facecolor = facecolor,
-        opacity = 0.6
+        opacity = opacity
     )
 
     traces = [mesh]
@@ -41,7 +42,7 @@ function tracePolyhedron(poly::Polyhedron; color::Color = RGB(0,0.9,1), text::Bo
     end
 
     # plot vertices
-    mode = text ? "markers+text" : "markers"
+    mode = labels ? "markers+text" : "markers"
     trace = scatter3d(
     	x = [v[1] for v in poly.verts],
         y = [v[2] for v in poly.verts],
@@ -58,13 +59,20 @@ function tracePolyhedron(poly::Polyhedron; color::Color = RGB(0,0.9,1), text::Bo
 end
 
 
-function plotAssembly(assembly::Vector{Polyhedron}; text::Bool = false)
+function plot(assembly::Vector{Polyhedron}; labels::Bool = false, width::Int = 600, height::Int = 600)
     colors = distinguishable_colors(length(assembly), RGB(0,0,0))
 
-    plot(reverse(union([tracePolyhedron(poly; color = colors[i], text = text) for (i, poly) in enumerate(assembly)]...)), Layout(showlegend = false))
+    plot(reverse(union([trace_polyhedron(poly; color = colors[i], labels = labels) for (i, poly) in enumerate(assembly)]...)), 
+         Layout(showlegend = false, 
+                autosize = false, 
+                width = width, 
+                height = height,
+                scene_aspectmode = "data"
+         ))
 end
 
 
-function plotPolyhedron(poly::Polyhedron; color::Color = RGB(0,0.9,1), text::Bool = false)
-    plot(tracePolyhedron(poly; color = color, text = text), Layout(showlegend = false))
+function plot(poly::Polyhedron; color::Color = RGB(0,0.9,1), labels::Bool = false, width::Int = 600, height::Int = 600)
+    plot(trace_polyhedron(poly; color = color, labels = labels), 
+         Layout(showlegend = false, autosize = false, width=width, height = height, scene_aspectmode = "data"))
 end

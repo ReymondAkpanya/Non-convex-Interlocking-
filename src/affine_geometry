@@ -1,0 +1,97 @@
+function dist(v::Vector{<:Real}, w::Vector{<:Real})
+    return norm(v-w)
+end
+
+function sqdist(v::Vector{<:Real}, w::Vector{<:Real})
+    return sum((v-w).^2)
+end
+
+
+"""
+    affinemap(preim::Vector{<:Vector{<:Real}}, im::Vector{<:Vector{<:Real}})
+
+TBW
+"""
+function affinemap(preim::Vector{<:Vector{<:Real}}, im::Vector{<:Vector{<:Real}}; atol = 1e-8)
+    @assert length(preim) == length(im) "Preimage ind image have to have the same length"
+
+    d_pre = length(preim[1]) # dimension of underlying space of preimage
+    d_im = length(im[1]) # dimension of underlying space of image
+    @assert all([length(v) == d_pre for v in preim]) "Dimension of preimage vectors inconsistent."
+    @assert all([length(v) == d_im for v in im]) "Dimension of image vectors inconsistent."
+    
+    A = hcat(preim...)
+    A = vcat(A, reshape(repeat([1], d_pre + 1), (1, d_pre + 1))) # embed preimage into higher dimensional space
+    b = hcat(im...)
+    b = vcat(b, reshape(repeat([1], d_im + 1), (1, d_pre + 1))) # embed image into higher dimensional space
+
+    @assert length(colspace(A, tol = atol)) == d_pre + 1 "The preimage needs to consist of an affine basis."
+
+    function aff(x::Vector{<:Real})
+        M = b * inv(A)
+        return (M * vcat(x, [1]))[1:(end-1)]
+    end
+
+    return aff
+end
+
+"""
+    rigidmap(preim::Vector{<:Vector{<:Real}}, im::Vector{<:Vector{<:Real}})
+
+TBW
+"""
+function rigidmap(preim::Vector{<:Vector{<:Real}}, im::Vector{<:Vector{<:Real}}; atol::Real = 1e-8)
+    @assert length(preim) == length(im) "Preimage ind image have to have the same length"
+
+    for i in 1:length(preim)
+        for j in (i+1):length(preim)
+            @assert abs(dist(preim[i], preim[j]) - dist(im[i], im[j])) < atol "Distance between preimage and image points need needs to be identical, but the distance between the points $(i) and $(j) is $(dist(preim[i], preim[j])) in the perimage and $(dist(im[i], im[j])) in the image."
+        end
+    end
+
+    return affinemap(preim, im, atol=atol)
+end
+
+"""
+    affinebasis_indices(s::Vector{<:Vector{<:Real}})
+
+Find the indices of the entries in s that form an affine basis of the affine space spanned by the entries of s.
+Real values < atol are considered 0.
+"""
+function affinebasis_indices(s::Vector{<:Vector{<:Real}}; atol::Real = 1e-8)
+    d = length(s[1])
+    @assert all([length(v) == d for v in s]) "Dimension mismatch in the set of affine points."
+    sol = []
+    for (i,v) in enumerate(s)
+        A = hcat(s[sol]..., v)
+        A = vcat(A, reshape(repeat([1], length(sol) + 1), (1, length(sol) + 1)))
+        if length(colspace(A, tol = atol)) == length(sol) + 1
+            append!(sol, i)
+        end
+        if length(sol) == d+1
+            return sol
+        end
+    end
+
+    return sol
+end
+
+"""
+    affinebasis(s::Vector{<:Vector{<:Real}})
+
+Find an affine basis of the affine space spanned by the points in s.
+Real values < atol are considered zero.
+"""
+function affinebasis(s::Vector{<:Vector{<:Real}}; atol::Real = 1e-8)
+    return s[affinebasis_indices(s, atol = atol)]
+end
+
+"""
+    affinedim(s::Vector{<:Vector{<:Real}})
+
+Affine dimension of the affine space spanned by the entries of s.
+Real values < atol are considered zero.
+"""
+function affinedim(s::Vector{<:Vector{<:Real}}; atol::Real = 1e-8)
+    return length(affinebasis(s, atol = atol)) - 1
+end

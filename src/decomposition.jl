@@ -6,7 +6,7 @@ include("combinatorics.jl")
 """
 returns a polyhedron containing the vertices and edges of poly such that every facet is triangular.
 """
-function triangulatePolyhedron(poly::Polyhedron)::Polyhedron
+function triangulate(poly::Polyhedron)::Polyhedron
     newVerts = deepcopy(poly.verts)
     newEdges = deepcopy(poly.edges)
     newFacets = Vector{Int}[]
@@ -54,7 +54,7 @@ Checks whether the edge e is turnable edge of poly. I.e. poly is
     - the line connecting the wingtips of the butterfly with inner edge e is contained in poly.
 Floats with abs value <tol are considered zeros
 """
-function isturnable(e::Vector{Int}, polyhedron::Polyhedron, tol::Float64=1e-5)::Bool
+function isturnable(e::Vector{<:Int}, polyhedron::Polyhedron, tol::Real=1e-5)::Bool
     @assert all(length.(polyhedron.facets).==3) "poly may only have triangle facets"
     @assert in(e, polyhedron.edges) || in(reverse(e), poly.edges) "e has to be an edge of poly"
     
@@ -74,10 +74,10 @@ tol::Float64
 returns whether poly is convex
 Floats with abs value <tol are considered zeros
 """
-function isconvex(poly::Polyhedron, tol::Float64=1e-5)::Bool
+function isconvex(poly::Polyhedron, tol::Real=1e-5)::Bool
     polyhedron = deepcopy(poly)
     if any(length.(polyhedron.facets).!=3)
-        polyhedron = triangulatePolyhedron(polyhedron)
+        polyhedron = triangulate(polyhedron)
     end
 
     for edge in polyhedron.edges
@@ -93,10 +93,10 @@ end
 poly::Polyhedron
 returns a vector of tetrahedra, which union is the Polyhedron poly.
 """
-function convexDecomposition(poly::Polyhedron)::Vector{Polyhedron}
+function convexdecomp(poly::Polyhedron)::Vector{Polyhedron}
     sol = Polyhedron[]
 
-    triangPoly = triangulatePolyhedron(poly)
+    triangPoly = triangulate(poly)
     subPoly = deepcopy(triangPoly)
 
     while !isconvex(subPoly)

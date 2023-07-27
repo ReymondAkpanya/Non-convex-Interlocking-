@@ -51,7 +51,7 @@ function FacesOfEdges(poly::Polyhedron)
     return map(i->FacesOfEdge(poly,i),1:NumberOfEdges(poly))
 end
 
-function FacesOfEdge(poly::Polyhedron,edge::Vector{Int})
+function FacesOfEdge(poly::Polyhedron,edge::Vector{<:Int})
     res=[]
     faces=poly.facets
     for face in faces 
@@ -119,7 +119,7 @@ function FaceDegreeOfVertex(poly::Polyhedron,v::Int)
 end
 
 ##### Boundaery Edges
-function  IsBoundaryEdge(poly::Polyhedron,edge::Vector{Int})
+function  IsBoundaryEdge(poly::Polyhedron,edge::Vector{<:Int})
     foe=FacesOfEdge(poly,edge)
     return length(foe)==1 
 end
@@ -146,7 +146,7 @@ function  IsInnerEdge(poly::Polyhedron,edge::Int)
     return length(foe)==2 
 end
 
-function  IsInnerEdge(poly::Polyhedron,edge::Vector{Int})
+function  IsInnerEdge(poly::Polyhedron,edge::Vector{<:Int})
     foe=FacesOfEdge(poly,edge)
     return length(foe)==2 
 end
@@ -164,7 +164,7 @@ end
 
 
 #### RamifiedEdges
-function IsRamifiedEdge(poly::Polyhedron,edge::Vector{Int})
+function IsRamifiedEdge(poly::Polyhedron,edge::Vector{<:Int})
     foe=FacesOfEdge(poly,edge)
     return length(foe)>=3 
 end
@@ -294,7 +294,7 @@ end
 
 ####NeighbourFaceByEdge
 
-function NeighbourFaceByEdge(poly::Polyhedron,face::Vector{Int},edge::Vector{Int})
+function NeighbourFaceByEdge(poly::Polyhedron,face::Vector{<:Int},edge::Vector{<:Int})
    res=[]
    for f in poly.facets
         if edge[1] in f && edge[2] in f 
@@ -349,7 +349,7 @@ end
 
 ################helperfunctions
 
-function help_Position(l::Vector{Vector{Int}},x::Vector{Int})
+function help_Position(l::Vector{Vector{<:Int}},x::Vector{<:Int})
     x2=[]
     for i in 1:length(x)
         push!(x2,x[length(x)-i+1])
@@ -371,7 +371,7 @@ function help_Position(l::Vector{Vector{Int}},x::Int)
     return false
 end
 
-function help_Position(l::Vector{Int},x::Int)
+function help_Position(l::Vector{<:Int},x::Int)
     for i in 1:length(l)
 	if l[i]==x 
 	    return i
@@ -380,7 +380,7 @@ function help_Position(l::Vector{Int},x::Int)
     return false
 end
 
-function help_OrientateFace(poly::Polyhedron,face::Vector{Int},edge::Vector{Int})
+function help_OrientateFace(poly::Polyhedron,face::Vector{<:Int},edge::Vector{<:Int})
     orientFace=[]
     p1=help_Position(face,edge[1])
     p2=help_Position(face,edge[2])
