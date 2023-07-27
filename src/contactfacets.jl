@@ -8,7 +8,8 @@ function help_crossProduct(A::Vector,B::Vector)
 	A[1]*B[2]-A[2]*B[1]];
 	return CP;
 end
-function ComputeIntersections(poly1::Polyhedron,poly2::Polyhedron)
+
+function ComputeContactFacets(poly1::Polyhedron,poly2::Polyhedron)
     res=[]
     coordinates1=poly1.verts
     coordinates2=poly2.verts
@@ -94,7 +95,7 @@ function ComputeIntersections(poly1::Polyhedron,poly2::Polyhedron)
 end
 
 
-function testComputeIntersection(num::Int)
+function testComputeContactFacets(num::Int)
 
     if num==1 
 	surf1=Polyhedron([[0, 0, 0], [1, 0, 0], [0, 1, 0]], [[1, 2], [2, 3], [1, 3]], [[1, 2, 3]])
@@ -109,7 +110,7 @@ function testComputeIntersection(num::Int)
 	surf1=Polyhedron([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]], [[1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4]], [[1, 2, 3], [1, 2, 4], [1, 3, 4], [2, 3, 4]])
 	surf2=Polyhedron([[1, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]], [[1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4]], [[1, 2, 3], [1, 2, 4], [1, 3, 4], [2, 3, 4]])
     end
-return ComputeIntersections(surf1,surf2)
+return ComputeContactFacets(surf1,surf2)
 
 end
 
